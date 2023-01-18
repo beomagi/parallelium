@@ -12,11 +12,19 @@ Usage:
 
 ## Jobfile format:
 command1
+
 command2
+
 command3
+
 #optional comment
+
 command4
 
+#### Note:
+
 \#comments are optional, and can control execution somewhat.
+
 \#tag tag1 tag2 tag3 <-- All jobs after carry these tags.
+
 \#cpu n              <-- Specify the load on the cpu for all following jobs. Default is 1. (future)
