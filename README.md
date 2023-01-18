@@ -9,7 +9,8 @@ Usage:
 * -p parallel-jobs : Optional. Used to specify a strict number of parallel jobs. If not present, then machine CPU count is used.
 * -t tag1,..tagn   : (future) Optional. Commands in jobfile can be tagged. If present, this option only runs commands with this tag.
 
-Jobfile format:
+
+## Jobfile format:
 
 \#tag tag1 tag2 tag3 <-- All jobs after carry these tags.
 
