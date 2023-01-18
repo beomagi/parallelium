@@ -10,5 +10,7 @@ Usage:
 * -t tag1,..tagn   : (future) Optional. Commands in jobfile can be tagged. If present, this option only runs commands with this tag.
 
 Jobfile format:
-'#tag tag1 tag2 tag3 <-- All jobs after carry these tags.
-'#cpu n              <-- Specify the load on the cpu for all following jobs. Default is 1. (future)
+
+\#tag tag1 tag2 tag3 <-- All jobs after carry these tags.
+
+\#cpu n              <-- Specify the load on the cpu for all following jobs. Default is 1. (future)
