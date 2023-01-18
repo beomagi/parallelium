@@ -134,6 +134,14 @@ def runjobs(joblist,parallel=4,randomize=False,logdir=None,logfileprefix=None):
 
 
 if __name__=="__main__":
+    #--handle parameters
+    jobfile=paramget("-f")
+    maxprocs=paramget("-p")
+    if maxprocs==None:
+        import multiprocessing
+        maxprocs=multiprocessing.cpu_count()
+    else:
+        maxprocs=int(maxprocs)
     jobfile=paramget("-f")
     logdir=paramget("-l")
     logfileprefix=None
@@ -142,6 +150,7 @@ if __name__=="__main__":
         if not os.path.isdir(logdir):
             print("{} folder does not exist".format(logdir))
             sys.exit(2)
+    #--end handle parameters
 
     if not jobfile:
         print("missing: -f jobfile")
@@ -150,4 +159,4 @@ if __name__=="__main__":
         jobtext=fh.read()
 
     joblist=jobtext2joblist(jobtext)
-    runjobs(joblist,parallel=28,logdir=logdir,logfileprefix=logfileprefix)
+    runjobs(joblist,parallel=maxprocs,logdir=logdir,logfileprefix=logfileprefix)
