@@ -25,6 +25,6 @@ command4
 
 \#comments are optional, and can control execution somewhat.
 
-\#tag tag1 tag2 tag3 <-- All jobs after carry these tags.
+\#tag Thisisatag run5mins rundaily <-- All jobs after carry these tags.
 
 \#cpu n              <-- Specify the load on the cpu for all following jobs. Default is 1. (future)
