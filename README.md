@@ -28,3 +28,7 @@ command4
 \#tag Thisisatag run5mins rundaily <-- All jobs after carry these tags.
 
 \#cpu n              <-- Specify the load on the cpu for all following jobs. Default is 1. (future)
+
+
+Sample Run:
+![Sample Run](./images/parallelium_sample_run.png)
