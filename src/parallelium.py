@@ -116,6 +116,8 @@ def runjobs(joblist,parallel=4,randomize=False,logdir=None,logfileprefix=None):
     cntr=0
     restperiod=0.01
     job_finish_count=0
+    inittime=time.time()
+    print("   RunTime   ToDo   Now   Fin")
     while len(todo)+len(currentjoblist)>0:
         cntr+=1
         loadjobs(todo,currentjoblist,parallel,randomize)
@@ -129,13 +131,27 @@ def runjobs(joblist,parallel=4,randomize=False,logdir=None,logfileprefix=None):
             else:
                 print(output)
         if (cntr%(1.0/restperiod))==0:
-            print("jobcountstatus: {} {} {}".format(len(todo),len(currentjoblist),job_finish_count))
+            currtime=time.time()
+            passtime=float(int((currtime-inittime)*1000))/1000
+            padding="                   "
+            formtime=(padding+str(passtime))[-10:]
+            formlentodo=(padding+str(len(todo)))[-5:]
+            formlencurr=(padding+str(len(currentjoblist)))[-5:]
+            formfincnt=(padding+str(job_finish_count))[-5:]
+            print("{}: {} {} {}".format(formtime,formlentodo,formlencurr,formfincnt))
         time.sleep(restperiod)
+    currtime=time.time()
+    passtime=float(int((currtime-inittime)*1000))/1000
+    padding="                   "
+    formtime=(padding+str(passtime))[-10:]
+    formlentodo=(padding+str(len(todo)))[-5:]
+    formlencurr=(padding+str(len(currentjoblist)))[-5:]
+    formfincnt=(padding+str(job_finish_count))[-5:]
+    print("{}: {} {} {}".format(formtime,formlentodo,formlencurr,formfincnt))
 
 
 if __name__=="__main__":
     #--handle parameters
-    jobfile=paramget("-f")
     maxprocs=paramget("-p")
     if maxprocs==None:
         import multiprocessing
