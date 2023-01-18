@@ -5,6 +5,9 @@ import subprocess
 import copy
 import random
 import time
+import os
+
+filename=""
 
 def paramget(paramflag):
     args=sys.argv
@@ -14,6 +17,9 @@ def paramget(paramflag):
     return None
 
 def jobtext2joblist(jobtext):
+    """take text from file parse it,
+    apply tags and other directives
+    create joblist for execution"""
     joblist=[]
     tags=[]
     joblines=jobtext.split("\n")
@@ -48,6 +54,9 @@ def jobtext2joblist(jobtext):
 
 
 def loadjobs(todo,currentjoblist,parallel,randomize):
+    """take list of jobs todo and current, max parallel
+    and random pick. If current is less that parallel,
+    move from todo to current running"""
     proc_used=0
     for ajob in currentjoblist:
         proc_used+=ajob["processes"]
@@ -61,9 +70,12 @@ def loadjobs(todo,currentjoblist,parallel,randomize):
             currentjoblist.append(pulledjob)
 
 def execute_jobs(currentjoblist):
+    """check all jobs currently running and use status
+    to start, or handle their termination. return
+    list of terminated jobs and remove them from current
+    running joblist."""
     finished_jobs=[]
     jobcount=len(currentjoblist)
-
     jobidx=0
     while jobidx<jobcount:
         jobstatus=currentjoblist[jobidx]["status"]
@@ -77,7 +89,7 @@ def execute_jobs(currentjoblist):
             popenobj=currentjoblist[jobidx]["popenobj"]
             chkalive=popenobj.poll()
             if chkalive!=None:
-                output=popenobj.stdout.read()
+                output=popenobj.stdout.read().decode('utf-8')
                 currentjoblist[jobidx]["output"]=output
                 currentjoblist[jobidx]["endtime"]=time.time()
                 currentjoblist[jobidx]["status"]=2
@@ -90,25 +102,47 @@ def execute_jobs(currentjoblist):
     return finished_jobs
 
 
-def runjobs(joblist,parallel=4,randomize=False):
+def logoutput(output,logdir,logfileprefix,linenumber):
+    outfname=logdir+os.sep+logfileprefix+"_"+linenumber+".txt"
+    outfname=outfname.replace(os.sep+os.sep,os.sep) #cater for double //
+    with open(outfname,'w') as fh:
+        fh.write(output)
+
+def runjobs(joblist,parallel=4,randomize=False,logdir=None,logfileprefix=None):
+    """Manage the full joblist. keep running set amount
+    in parallel, and handle termination and output"""
     todo=copy.deepcopy(joblist)
     currentjoblist=[]
     cntr=0
     restperiod=0.01
+    job_finish_count=0
     while len(todo)+len(currentjoblist)>0:
         cntr+=1
         loadjobs(todo,currentjoblist,parallel,randomize)
         completed_jobs=execute_jobs(currentjoblist)
+        job_finish_count+=len(completed_jobs)
         for finishedjob in completed_jobs:
             output=finishedjob["output"]
-            print(output)
+            if logdir:
+                lead0=str(1000000+finishedjob["line"])[-4:]
+                logoutput(output,logdir,logfileprefix,lead0)
+            else:
+                print(output)
         if (cntr%(1.0/restperiod))==0:
-            print("jobcountstatus: {} {} {}".format(len(todo),len(currentjoblist),0))
+            print("jobcountstatus: {} {} {}".format(len(todo),len(currentjoblist),job_finish_count))
         time.sleep(restperiod)
 
 
 if __name__=="__main__":
     jobfile=paramget("-f")
+    logdir=paramget("-l")
+    logfileprefix=None
+    if logdir:
+        logfileprefix=jobfile
+        if not os.path.isdir(logdir):
+            print("{} folder does not exist".format(logdir))
+            sys.exit(2)
+
     if not jobfile:
         print("missing: -f jobfile")
         exit(1)
@@ -116,4 +150,4 @@ if __name__=="__main__":
         jobtext=fh.read()
 
     joblist=jobtext2joblist(jobtext)
-    runjobs(joblist,parallel=28)
+    runjobs(joblist,parallel=28,logdir=logdir,logfileprefix=logfileprefix)
