@@ -1,0 +1,5 @@
+echo "Uptime (minutes): `ups=\`uptime --pretty\`;echo $ups| awk '{print $2*24*60+$4*60+$6}'`"
+echo "Processor Count: `cat /proc/cpuinfo | grep "^processor.*: [0-9]*" | wc -l`"
+echo "CPU Idle : `top -bn2 -d5 | grep "^%Cpu" | tail -1 | awk -F ',' '{print $4}' | awk '{print $1}'`"
+echo "RAM Available % : `free -b | grep "^Mem" | awk '{print 100*$7/$2}'`"
+echo "Total Memory : `free -h --giga | grep "^Mem" | awk '{print $2}'`"
