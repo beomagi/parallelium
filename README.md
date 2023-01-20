@@ -7,7 +7,7 @@ Usage:
 * -f jobfile       : Required. A list of commands, one per line. Comments can be used as job control parameters.
 * -l logs-folder   : Optional. Output to screen if not preset. If present, then for each job in the jobfile, an output log ./logs-folder/jobfile_linenumber.txt
 * -p parallel-jobs : Optional. Used to specify a strict number of parallel jobs. If not present, then machine CPU count is used.
-* -t tag1,..tagn   : (future) Optional. Commands in jobfile can be tagged. If present, this option only runs commands with this tag.
+* -t tag1,..tagn   : Optional. Commands in jobfile can be tagged. If present, this option only runs commands with this tag.
 
 
 ## Jobfile format:
@@ -27,7 +27,7 @@ command4
 
 \#tag Thisisatag run5mins rundaily <-- All jobs after carry these tags.
 
-\#cpu n              <-- Specify the load on the cpu for all following jobs. Default is 1. (future)
+\#cpu n              <-- Specify the load on the cpu for all following jobs. Default is 1.(future)
 
 
 Sample Run:
