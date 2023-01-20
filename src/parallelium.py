@@ -16,7 +16,7 @@ def paramget(paramflag):
         return argvalue
     return None
 
-def jobtext2joblist(jobtext):
+def jobtext2joblist(jobtext,filtertags):
     """take text from file parse it,
     apply tags and other directives
     create joblist for execution"""
@@ -33,7 +33,7 @@ def jobtext2joblist(jobtext):
             #get directive command and params
             syscmd=jobdesc[1:].split(" ")[0]
             try:
-                sysparams=jobdesc.split(" ")[1:]
+                sysparams=jobdesc.replace(","," ").split(" ")[1:]
                 while "" in sysparams:
                     sysparams.remove("")
             except BaseException:
@@ -43,13 +43,22 @@ def jobtext2joblist(jobtext):
                 tags=sysparams
             continue #directive handled, next line
         else: #Not blank, nor a directive, assume a command
-            ajob={}
-            ajob["cmd"]=jobdesc
-            ajob["tags"]=tags.copy()
-            ajob["line"]=linenumber
-            ajob["processes"]=1
-            ajob["status"]=0
-            joblist.append(ajob)
+            addjob=False
+            if filtertags:
+                for ftag in filtertags:
+                    if ftag in tags:
+                        addjob=True
+                        break
+            else:
+                addjob=True
+            if addjob:
+                ajob={}
+                ajob["cmd"]=jobdesc
+                ajob["tags"]=tags.copy()
+                ajob["line"]=linenumber
+                ajob["processes"]=1
+                ajob["status"]=0
+                joblist.append(ajob)
     return joblist
 
 
@@ -92,6 +101,7 @@ def execute_jobs(currentjoblist):
                 output=popenobj.stdout.read().decode('utf-8')
                 currentjoblist[jobidx]["output"]=output
                 currentjoblist[jobidx]["endtime"]=time.time()
+                currentjoblist[jobidx]["runtime"]=currentjoblist[jobidx]["starttime"]-currentjoblist[jobidx]["endtime"]
                 currentjoblist[jobidx]["status"]=2
         if jobstatus==2: #job is finished, pop from running and move to finished_jobs
             finishedjob=currentjoblist.pop(jobidx)
@@ -103,7 +113,7 @@ def execute_jobs(currentjoblist):
 
 
 def logoutput(output,logdir,logfileprefix,linenumber):
-    outfname=logdir+os.sep+logfileprefix+"_"+linenumber+".txt"
+    outfname=logdir+os.sep+logfileprefix+"_"+linenumber+".output"
     outfname=outfname.replace(os.sep+os.sep,os.sep) #cater for double //
     with open(outfname,'w') as fh:
         fh.write(output)
@@ -117,7 +127,7 @@ def runjobs(joblist,parallel=4,randomize=False,logdir=None,logfileprefix=None):
     restperiod=0.01
     job_finish_count=0
     inittime=time.time()
-    print("   RunTime   ToDo   Now   Fin")
+    print("#   RunTime   ToDo   Now   Fin")
     while len(todo)+len(currentjoblist)>0:
         cntr+=1
         loadjobs(todo,currentjoblist,parallel,randomize)
@@ -129,6 +139,7 @@ def runjobs(joblist,parallel=4,randomize=False,logdir=None,logfileprefix=None):
                 lead0=str(1000000+finishedjob["line"])[-4:]
                 logoutput(output,logdir,logfileprefix,lead0)
             else:
+                print(finishedjob["cmd"])
                 print(output)
         if (cntr%(1.0/restperiod))==0:
             currtime=time.time()
@@ -138,7 +149,7 @@ def runjobs(joblist,parallel=4,randomize=False,logdir=None,logfileprefix=None):
             formlentodo=(padding+str(len(todo)))[-5:]
             formlencurr=(padding+str(len(currentjoblist)))[-5:]
             formfincnt=(padding+str(job_finish_count))[-5:]
-            print("{}: {} {} {}".format(formtime,formlentodo,formlencurr,formfincnt))
+            print("#{}  {} {} {}".format(formtime,formlentodo,formlencurr,formfincnt))
         time.sleep(restperiod)
     currtime=time.time()
     passtime=float(int((currtime-inittime)*1000))/1000
@@ -147,7 +158,7 @@ def runjobs(joblist,parallel=4,randomize=False,logdir=None,logfileprefix=None):
     formlentodo=(padding+str(len(todo)))[-5:]
     formlencurr=(padding+str(len(currentjoblist)))[-5:]
     formfincnt=(padding+str(job_finish_count))[-5:]
-    print("{}: {} {} {}".format(formtime,formlentodo,formlencurr,formfincnt))
+    print("#{}  {} {} {}".format(formtime,formlentodo,formlencurr,formfincnt))
 
 
 if __name__=="__main__":
@@ -166,6 +177,13 @@ if __name__=="__main__":
         if not os.path.isdir(logdir):
             print("{} folder does not exist".format(logdir))
             sys.exit(2)
+    tagsparam=paramget("-t")
+    if tagsparam:
+        tags=tagsparam.split(",")
+        while "" in tags:
+            tags.remove("")
+    else:
+        tags=None #default all
     #--end handle parameters
 
     if not jobfile:
@@ -174,5 +192,5 @@ if __name__=="__main__":
     with open(jobfile,"r") as fh:
         jobtext=fh.read()
 
-    joblist=jobtext2joblist(jobtext)
+    joblist=jobtext2joblist(jobtext,tags)
     runjobs(joblist,parallel=maxprocs,logdir=logdir,logfileprefix=logfileprefix)

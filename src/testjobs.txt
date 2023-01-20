@@ -1,4 +1,4 @@
-#tag common, sleeps, classA
+#tag common sleeps classA
 (sleep 4.495;echo "job 000")
 (sleep 0.647;echo "job 001")
 (sleep 0.406;echo "job 002")
@@ -17,7 +17,7 @@
 (sleep 2.603;echo "job 015")
 (sleep 2.587;echo "job 016")
 
-#tag common, sleeps, classB
+#tag common sleeps classB
 (sleep 0.218;echo "job 017")
 (sleep 0.738;echo "job 018")
 (sleep 3.285;echo "job 019")
@@ -43,7 +43,7 @@
 (sleep 4.136;echo "job 039")
 (sleep 2.269;echo "job 040")
 
-#tag common, sleeps, classB
+#tag common sleeps classC
 (sleep 2.586;echo "job 041")
 (sleep 0.334;echo "job 042")
 (sleep 1.078;echo "job 043")
@@ -104,7 +104,7 @@
 (sleep 0.785;echo "job 098")
 (sleep 1.626;echo "job 099")
 
-#tag lasthalf, sleeps, classC
+#tag lasthalf, sleeps, classB
 (sleep 1.540;echo "job 100")
 (sleep 4.365;echo "job 101")
 (sleep 2.508;echo "job 102")
